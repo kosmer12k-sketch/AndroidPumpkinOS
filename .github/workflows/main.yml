@@ -18,33 +18,26 @@ jobs:
         with:
           submodules: 'recursive'
 
-      # 2. Устанавливаем Java 17, так как она нужна для работы современного sdkmanager
-      - name: Set up JDK 17 for Android SDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
+      # 2. Принимаем все лицензии предустановленного Android SDK (используя системную Java 17)
+      - name: Accept Android SDK licenses
+        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
-      # 3. Настраиваем Android SDK
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      # 4. Переключаемся на Java 11 для самого процесса сборки старого Gradle
-      - name: Switch to JDK 11 for Gradle
+      # 3. Устанавливаем Java 11 для работы старого Gradle
+      - name: Set up JDK 11
         uses: actions/setup-java@v4
         with:
           java-version: '11'
           distribution: 'temurin'
 
-      # 5. Выдаем права на выполнение скрипта сборки
+      # 4. Выдаем права на выполнение скрипта сборки
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # 6. Компилируем Debug APK
+      # 5. Компилируем Debug APK
       - name: Build Debug APK
         run: ./gradlew assembleDebug
 
-      # 7. Упаковываем готовый APK в ZIP-архив
+      # 6. Упаковываем готовый APK в ZIP-архив
       - name: Upload APK as ZIP artifact
         uses: actions/upload-artifact@v4
         with:
