@@ -5,39 +5,46 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch: # Позволяет запускать сборку вручную кнопкой на вкладке Actions
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Скачиваем код репозитория И обязательный подмодуль PumpkinOS
+      # 1. Скачиваем код репозитория и подмодуль PumpkinOS
       - name: Checkout repository with submodules
         uses: actions/checkout@v4
         with:
           submodules: 'recursive'
 
-      # 2. Устанавливаем Java 11 (оптимально для проектов эпохи Android Studio 2020.3)
-      - name: Set up JDK 11
+      # 2. Устанавливаем Java 17, так как она нужна для работы современного sdkmanager
+      - name: Set up JDK 17 for Android SDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # 3. Настраиваем Android SDK
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      # 4. Переключаемся на Java 11 для самого процесса сборки старого Gradle
+      - name: Switch to JDK 11 for Gradle
         uses: actions/setup-java@v4
         with:
           java-version: '11'
           distribution: 'temurin'
 
-      # 3. Настраиваем Android SDK (автоматически докачает нужные Build-Tools, NDK и CMake)
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      # 4. Выдаем права на выполнение скрипта сборки Gradle
+      # 5. Выдаем права на выполнение скрипта сборки
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # 5. Компилируем Debug APK
+      # 6. Компилируем Debug APK
       - name: Build Debug APK
         run: ./gradlew assembleDebug
 
-      # 6. Упаковываем готовый APK в ZIP-архив для скачивания
+      # 7. Упаковываем готовый APK в ZIP-архив
       - name: Upload APK as ZIP artifact
         uses: actions/upload-artifact@v4
         with:
