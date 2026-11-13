@@ -18,16 +18,18 @@ jobs:
         with:
           submodules: 'recursive'
 
-      # 2. Устанавливаем Java 17 (требуется для Android Gradle Plugin)
+      # 2. Устанавливаем Java 17
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # 3. Принимаем все лицензии предустановленного Android SDK
-      - name: Accept Android SDK licenses
-        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+      # 3. Принимаем лицензии и устанавливаем требуемый старый CMake 3.10.2
+      - name: Setup Android SDK licenses and CMake 3.10.2
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "cmake;3.10.2.4988404"
 
       # 4. Выдаем права на выполнение скрипта сборки
       - name: Grant execute permission for gradlew
